@@ -2,7 +2,7 @@
 
 # Healthcheck 
 
-[![Build Status](https://travis-ci.com/etherlabsio/healthcheck.svg)](https://travis-ci.com/etherlabsio/healthcheck) [![Go Report Card](https://goreportcard.com/badge/github.com/etherlabsio/healthcheck)](https://goreportcard.com/report/github.com/etherlabsio/healthcheck) [![GoDoc](https://godoc.org/github.com/etherlabsio/healthcheck?status.svg)](https://godoc.org/github.com/etherlabsio/healthcheck) [![codecov](https://codecov.io/gh/etherlabsio/healthcheck/branch/master/graph/badge.svg)](https://codecov.io/gh/etherlabsio/healthcheck) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fetherlabsio%2Fhealthcheck.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fetherlabsio%2Fhealthcheck?ref=badge_shield)
+[![Build Status](https://travis-ci.com/hoshsadiq/go-healthcheck.svg)](https://travis-ci.com/hoshsadiq/go-healthcheck) [![Go Report Card](https://goreportcard.com/badge/github.com/hoshsadiq/go-healthcheck)](https://goreportcard.com/report/github.com/hoshsadiq/go-healthcheck) [![GoDoc](https://godoc.org/github.com/hoshsadiq/go-healthcheck?status.svg)](https://godoc.org/github.com/hoshsadiq/go-healthcheck) [![codecov](https://codecov.io/gh/hoshsadiq/go-healthcheck/branch/master/graph/badge.svg)](https://codecov.io/gh/hoshsadiq/go-healthcheck) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fetherlabsio%2Fhealthcheck.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fetherlabsio%2Fhealthcheck?ref=badge_shield)
 
 A simple and extensible RESTful Healthcheck API implementation for Go services.
 
@@ -14,52 +14,52 @@ Implementing the `Checker` interface and passing it on to healthcheck allows you
 
 ## Example
 
-```GO
+```go
 package main
 
 import (
-    "context"
-    "database/sql"
-    "net/http"
-    "time"
+	"context"
+	"database/sql"
+	"net/http"
+	"time"
 
-    "github.com/etherlabsio/healthcheck"
-    "github.com/etherlabsio/healthcheck/checkers"
-    _ "github.com/go-sql-driver/mysql"
-    "github.com/gorilla/mux"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
+	"github.com/hoshsadiq/go-healthcheck"
+	"github.com/hoshsadiq/go-healthcheck/checkers"
 )
 
 func main() {
-    // For brevity, error check is being omitted here.
-    db, _ := sql.Open("mysql", "user:password@/dbname")
-    defer db.Close()
+	// For brevity, error check is being omitted here.
+	db, _ := sql.Open("mysql", "user:password@/dbname")
+	defer db.Close()
 
-    r := mux.NewRouter()
-    r.Handle("/healthcheck", healthcheck.Handler(
+	r := mux.NewRouter()
+	r.Handle("/healthcheck", healthcheck.Handler(
 
-        // WithTimeout allows you to set a max overall timeout.
-        healthcheck.WithTimeout(5*time.Second),
+		// WithTimeout allows you to set a max overall timeout.
+		healthcheck.WithTimeout(5*time.Second),
 
-        // Checkers fail the status in case of any error.
-        healthcheck.WithChecker(
-            "heartbeat", checkers.Heartbeat("$PROJECT_PATH/heartbeat"),
-        ),
+		// Checkers fail the status in case of any error.
+		healthcheck.WithChecker(
+			"heartbeat", checkers.Heartbeat("$PROJECT_PATH/heartbeat"),
+		),
 
-        healthcheck.WithChecker(
-            "database", healthcheck.CheckerFunc(
-                func(ctx context.Context) error {
-                    return db.PingContext(ctx)
-                },
-            ),
-        ),
+		healthcheck.WithChecker(
+			"database", healthcheck.CheckerFunc(
+				func(ctx context.Context) error {
+					return db.PingContext(ctx)
+				},
+			),
+		),
 
-        // Observers do not fail the status in case of error.
-        healthcheck.WithObserver(
-            "diskspace", checkers.DiskSpace("/var/log", 90),
-        ),
-    ))
+		// Observers do not fail the status in case of error.
+		healthcheck.WithObserver(
+			"diskspace", checkers.DiskSpace("/var/log", 90),
+		),
+	))
 
-    http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":8080", r)
 }
 ```
 
