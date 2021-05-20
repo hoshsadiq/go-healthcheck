@@ -4,7 +4,7 @@
 
 [![Build Status](https://travis-ci.com/hoshsadiq/go-healthcheck.svg)](https://travis-ci.com/hoshsadiq/go-healthcheck) [![Go Report Card](https://goreportcard.com/badge/github.com/hoshsadiq/go-healthcheck)](https://goreportcard.com/report/github.com/hoshsadiq/go-healthcheck) [![GoDoc](https://godoc.org/github.com/hoshsadiq/go-healthcheck?status.svg)](https://godoc.org/github.com/hoshsadiq/go-healthcheck) [![codecov](https://codecov.io/gh/hoshsadiq/go-healthcheck/branch/master/graph/badge.svg)](https://codecov.io/gh/hoshsadiq/go-healthcheck) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fhoshsadiq%2Fhealthcheck.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fhoshsadiq%2Fhealthcheck?ref=badge_shield)
 
-Note: This is a fork of [etherlabsio/healthcheck](https://github.com/etherlabsio/healthcheck) with some changes that allow the health checkers to be easily used outside of HTTP servers, but also, in HTTP servers the error responses can be customised.
+Note: This is a fork of [etherlabsio/healthcheck](https://github.com/etherlabsio/healthcheck) with some changes that allow the health checkers to be easily used outside of HTTP servers, but also, in HTTP servers the error responses can be customised. This fork is not compatible with the original code.
 
 A simple and extensible RESTful Healthcheck API implementation for Go services.
 
