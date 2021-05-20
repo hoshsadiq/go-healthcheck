@@ -1,4 +1,4 @@
-package checkers
+package checkers //nolint:testpackage
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 )
 
 func Test_diskspace_Check(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		dir         string
@@ -50,21 +52,26 @@ func Test_diskspace_Check(t *testing.T) {
 			fmt.Errorf("used: 50%% threshold: 40%% location: /"),
 		},
 	}
+
 	for _, tt := range tests {
+		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			ds := &diskspace{
+			t.Parallel()
+
+			ds := &diskSpace{
 				dir:       tt.dir,
 				threshold: tt.threshold,
 				statfs: func(fs string, stat *unix.Statfs_t) error {
 					stat.Bsize = 1
 					stat.Bfree = tt.freeBlocks
 					stat.Blocks = tt.totalBlocks
+
 					return nil
 				},
 			}
-			if err := ds.Check(context.Background()); err != tt.err {
+			if err := ds.Check(context.Background()); err != tt.err { //nolint:errorlint
 				if err == nil || tt.err == nil || err.Error() != tt.err.Error() {
-					t.Errorf("diskspace.Check() returned error = \"%v\" but expected \"%v\"", err, tt.err)
+					t.Errorf("diskSpace.Check() returned error = \"%v\" but expected \"%v\"", err, tt.err)
 				}
 			}
 		})

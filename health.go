@@ -1,3 +1,4 @@
+// Package healthcheck provides a health check service that allows to easily test if services are alive.
 package healthcheck
 
 import (
@@ -8,6 +9,7 @@ import (
 	"time"
 )
 
+// Service contains a health check service that can be used to check the health of multiple services.
 type Service interface {
 	CheckHealth(ctx context.Context) (httpError int, errorMsgs map[string]string)
 	Handler() http.Handler
@@ -25,25 +27,26 @@ type health struct {
 	timeout   time.Duration
 }
 
-// NewService returns a new Service instance
+// NewService returns a new Service instance.
 func NewService(opts ...Option) Service {
 	h := &health{
 		checkers:  make(map[string]Checker),
 		observers: make(map[string]Checker),
-		timeout:   30 * time.Second,
+		timeout:   30 * time.Second, //nolint:gomnd
 	}
 	for _, opt := range opts {
 		opt(h)
 	}
+
 	return h
 }
 
-// Handler returns an http.Handler
+// Handler returns an http.Handler.
 func (h *health) Handler() http.Handler {
 	return h
 }
 
-// HandlerFunc returns an http.HandlerFunc to mount the API implementation at a specific route
+// HandlerFunc returns an http.HandlerFunc to mount the API implementation at a specific route.
 func (h *health) HandlerFunc() http.HandlerFunc {
 	return h.ServeHTTP
 }
@@ -53,13 +56,13 @@ func (h *health) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(code)
-	json.NewEncoder(w).Encode(response{
+	_ = json.NewEncoder(w).Encode(response{
 		Status: http.StatusText(code),
 		Errors: errorMsgs,
 	})
 }
 
-// CheckHealth does the heavy lifting of checking all the services based on the configured Checker functions
+// CheckHealth does the heavy lifting of checking all the services based on the configured Checker functions.
 func (h *health) CheckHealth(ctx context.Context) (int, map[string]string) {
 	nCheckers := len(h.checkers) + len(h.observers)
 

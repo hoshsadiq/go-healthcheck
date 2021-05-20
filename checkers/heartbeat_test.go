@@ -1,4 +1,4 @@
-package checkers
+package checkers //nolint:testpackage
 
 import (
 	"context"
@@ -8,6 +8,8 @@ import (
 )
 
 func Test_heartbeat_Check(t *testing.T) {
+	t.Parallel()
+
 	cwd, err := os.Getwd()
 	if err != nil {
 		t.Fatalf("cwd unknown: %+v", err)
@@ -18,7 +20,9 @@ func Test_heartbeat_Check(t *testing.T) {
 	}
 	fileName := "heartbeat.txt"
 	filePath := fmt.Sprintf("%s/%s", cwd, fileName)
-	defer os.Remove(filePath)
+	t.Cleanup(func() {
+		_ = os.Remove(filePath)
+	})
 	type fields struct {
 		path string
 	}
@@ -29,9 +33,7 @@ func Test_heartbeat_Check(t *testing.T) {
 	}{
 		{
 			"if heartbeat file exists, no error should be returned",
-			fields{
-				absFilePath(filePath),
-			},
+			fields{absFilePath(filePath)},
 			false,
 		},
 		{
@@ -39,6 +41,7 @@ func Test_heartbeat_Check(t *testing.T) {
 			fields{
 				func() string {
 					os.Setenv("HBFILE_PATH", cwd)
+
 					return absFilePath("$HBFILE_PATH" + "/" + fileName)
 				}(),
 			},
@@ -50,8 +53,13 @@ func Test_heartbeat_Check(t *testing.T) {
 			true,
 		},
 	}
+
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			h := &heartbeat{
 				path: tt.fields.path,
 			}

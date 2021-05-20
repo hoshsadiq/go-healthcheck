@@ -12,7 +12,7 @@ type Checker interface {
 type CheckerFunc func(ctx context.Context) error
 
 // Check Implements the Checker interface to allow for any func() error method
-// to be passed as a Checker
+// to be passed as a Checker.
 func (c CheckerFunc) Check(ctx context.Context) error {
 	return c(ctx)
 }

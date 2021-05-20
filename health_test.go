@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/hoshsadiq/go-healthcheck"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/hoshsadiq/go-healthcheck"
 )
 
 func TestHealth_CheckHealth(t *testing.T) {
@@ -46,6 +47,7 @@ func TestHealth_CheckHealth(t *testing.T) {
 				healthcheck.WithTimeout(1 * time.Millisecond),
 				healthcheck.WithChecker("database", healthcheck.CheckerFunc(func(ctx context.Context) error {
 					time.Sleep(10 * time.Millisecond)
+
 					return nil
 				})),
 			},
@@ -83,8 +85,14 @@ func TestHealth_CheckHealth(t *testing.T) {
 			},
 		},
 	}
+
+	t.Parallel()
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
 			code, errorMessages := healthcheck.NewService(tt.args...).CheckHealth(context.TODO())
 			if code != tt.statusCode {
 				t.Errorf("expected code %d, got %d", tt.statusCode, code)
@@ -104,8 +112,8 @@ func TestHealth_HandlerFunc(t *testing.T) {
 		response   healthcheck.HealthResponse
 	}{
 		{
-			name:          "returns 200 status if no errors",
-			statusCode:    http.StatusOK,
+			name:       "returns 200 status if no errors",
+			statusCode: http.StatusOK,
 			response: healthcheck.HealthResponse{
 				Status: http.StatusText(http.StatusOK),
 			},
@@ -130,10 +138,15 @@ func TestHealth_HandlerFunc(t *testing.T) {
 			},
 		},
 	}
+
+	t.Parallel()
 	for _, tt := range tests {
+		tt := tt
+
 		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 			res := httptest.NewRecorder()
-			req, err := http.NewRequest("GET", "http://localhost/health", nil)
+			req, err := http.NewRequest("GET", "http://localhost/health", nil) //nolint:noctx
 			if err != nil {
 				t.Errorf("Failed to create request.")
 			}
