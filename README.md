@@ -4,6 +4,8 @@
 
 [![Build Status](https://travis-ci.com/hoshsadiq/go-healthcheck.svg)](https://travis-ci.com/hoshsadiq/go-healthcheck) [![Go Report Card](https://goreportcard.com/badge/github.com/hoshsadiq/go-healthcheck)](https://goreportcard.com/report/github.com/hoshsadiq/go-healthcheck) [![GoDoc](https://godoc.org/github.com/hoshsadiq/go-healthcheck?status.svg)](https://godoc.org/github.com/hoshsadiq/go-healthcheck) [![codecov](https://codecov.io/gh/hoshsadiq/go-healthcheck/branch/master/graph/badge.svg)](https://codecov.io/gh/hoshsadiq/go-healthcheck) [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fetherlabsio%2Fhealthcheck.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fetherlabsio%2Fhealthcheck?ref=badge_shield)
 
+Note: This is a fork of [etherlabsio/healthcheck](https://github.com/etherlabsio/healthcheck) with some changes that allow the health checkers to be easily used outside of HTTP servers, but also, in HTTP servers the error responses can be customised.
+
 A simple and extensible RESTful Healthcheck API implementation for Go services.
 
 Health provides an `http.Handlefunc` for use as a healthcheck endpoint used by external services or load balancers. The function is used to determine the health of the application and to remove unhealthy application hosts or containers from rotation.
@@ -14,12 +16,15 @@ Implementing the `Checker` interface and passing it on to healthcheck allows you
 
 ## Example
 
+#### Without HTTP servers
+
 ```go
 package main
 
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -34,8 +39,7 @@ func main() {
 	db, _ := sql.Open("mysql", "user:password@/dbname")
 	defer db.Close()
 
-	r := mux.NewRouter()
-	r.Handle("/healthcheck", healthcheck.Handler(
+	svc := healthcheck.NewService(
 
 		// WithTimeout allows you to set a max overall timeout.
 		healthcheck.WithTimeout(5*time.Second),
@@ -57,8 +61,23 @@ func main() {
 		healthcheck.WithObserver(
 			"diskspace", checkers.DiskSpace("/var/log", 90),
 		),
-	))
+	)
 
+	errorCode, errorMessages := svc.CheckHealth(context.Background())
+	fmt.Println(errorCode)
+	fmt.Println(errorMessages)
+
+	// this can also with a HTTP server
+	r := mux.NewRouter()
+	r.handle("/healthcheck", svc.Handler())
+	// alternatively you can customise the error message
+	r.handle("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		errorCode, errorMessages := svc.CheckHealth(context.Background())
+		// do something with errorCode and errorMessages
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(errorCode)
+		json.NewEncoder(w).Encode(errorMessages)
+	})
 	http.ListenAndServe(":8080", r)
 }
 ```
