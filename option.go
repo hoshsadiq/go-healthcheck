@@ -6,10 +6,10 @@ import (
 	"time"
 )
 
-// Option adds optional parameter for the Healthcheck
+// Option adds optional parameter for the Healthcheck.
 type Option func(*health)
 
-// WithChecker adds a status checker that needs to be added as part of healthcheck. i.e database, cache or any external dependency
+// WithChecker adds a status checker that needs to be added as part of healthcheck. i.e database, cache or any external dependency.
 func WithChecker(name string, s Checker) Option {
 	return func(h *health) {
 		h.checkers[name] = &timeoutChecker{s}

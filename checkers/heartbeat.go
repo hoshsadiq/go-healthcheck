@@ -18,6 +18,7 @@ func (h *heartbeat) Check(ctx context.Context) error {
 	if _, err := os.Stat(h.path); err != nil {
 		return errors.New("heartbeat not found. application should be out of rotation")
 	}
+
 	return nil
 }
 
@@ -38,5 +39,6 @@ func absFilePath(inPath string) string {
 	if p, err := filepath.Abs(inPath); err == nil {
 		return filepath.Clean(p)
 	}
+
 	return ""
 }
