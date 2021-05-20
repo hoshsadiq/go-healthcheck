@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/etherlabsio/healthcheck"
+	"github.com/hoshsadiq/go-healthcheck"
 	"golang.org/x/sys/unix"
 )
 
